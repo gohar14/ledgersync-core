@@ -1,0 +1,17 @@
+# Java/Maven
+target/
+*.jar
+*.war
+
+# IDEs (IntelliJ/VS Code)
+.idea/
+*.iws
+*.iml
+*.ipr
+.vscode/
+
+# OS-specific (Mac)
+.DS_Store
+
+# Logs
+*.log
