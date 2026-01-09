@@ -1,0 +1,231 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <!-- PART A: Spring Batch 5 Schema -->
+    <changeSet id="100-batch-sequences" author="ledgersync">
+        <createSequence sequenceName="BATCH_JOB_SEQ"/>
+        <createSequence sequenceName="BATCH_JOB_EXECUTION_SEQ"/>
+        <createSequence sequenceName="BATCH_STEP_EXECUTION_SEQ"/>
+    </changeSet>
+
+    <changeSet id="100-batch-tables" author="ledgersync">
+        <createTable tableName="BATCH_JOB_INSTANCE">
+            <column name="JOB_INSTANCE_ID" type="BIGINT">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="VERSION" type="BIGINT"/>
+            <column name="JOB_NAME" type="VARCHAR(100)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="JOB_KEY" type="VARCHAR(32)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <addUniqueConstraint tableName="BATCH_JOB_INSTANCE" columnNames="JOB_NAME, JOB_KEY" constraintName="JOB_INST_UN"/>
+
+        <createTable tableName="BATCH_JOB_EXECUTION">
+            <column name="JOB_EXECUTION_ID" type="BIGINT">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="VERSION" type="BIGINT"/>
+            <column name="JOB_INSTANCE_ID" type="BIGINT">
+                <constraints nullable="false" foreignKeyName="JOB_INST_EXEC_FK" references="BATCH_JOB_INSTANCE(JOB_INSTANCE_ID)"/>
+            </column>
+            <column name="CREATE_TIME" type="TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="START_TIME" type="TIMESTAMP"/>
+            <column name="END_TIME" type="TIMESTAMP"/>
+            <column name="STATUS" type="VARCHAR(10)"/>
+            <column name="EXIT_CODE" type="VARCHAR(2500)"/>
+            <column name="EXIT_MESSAGE" type="VARCHAR(2500)"/>
+            <column name="LAST_UPDATED" type="TIMESTAMP"/>
+            <column name="JOB_CONFIGURATION_LOCATION" type="VARCHAR(2500)"/>
+        </createTable>
+
+        <createTable tableName="BATCH_JOB_EXECUTION_PARAMS">
+            <column name="JOB_EXECUTION_ID" type="BIGINT">
+                <constraints nullable="false" foreignKeyName="JOB_EXEC_PARAMS_FK" references="BATCH_JOB_EXECUTION(JOB_EXECUTION_ID)"/>
+            </column>
+            <column name="PARAMETER_NAME" type="VARCHAR(100)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="PARAMETER_TYPE" type="VARCHAR(100)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="PARAMETER_VALUE" type="VARCHAR(2500)"/>
+            <column name="IDENTIFYING" type="CHAR(1)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <createTable tableName="BATCH_STEP_EXECUTION">
+            <column name="STEP_EXECUTION_ID" type="BIGINT">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="VERSION" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="STEP_NAME" type="VARCHAR(100)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="JOB_EXECUTION_ID" type="BIGINT">
+                <constraints nullable="false" foreignKeyName="JOB_EXEC_STEP_FK" references="BATCH_JOB_EXECUTION(JOB_EXECUTION_ID)"/>
+            </column>
+            <column name="START_TIME" type="TIMESTAMP"/>
+            <column name="END_TIME" type="TIMESTAMP"/>
+            <column name="STATUS" type="VARCHAR(10)"/>
+            <column name="COMMIT_COUNT" type="BIGINT"/>
+            <column name="READ_COUNT" type="BIGINT"/>
+            <column name="FILTER_COUNT" type="BIGINT"/>
+            <column name="WRITE_COUNT" type="BIGINT"/>
+            <column name="READ_SKIP_COUNT" type="BIGINT"/>
+            <column name="WRITE_SKIP_COUNT" type="BIGINT"/>
+            <column name="PROCESS_SKIP_COUNT" type="BIGINT"/>
+            <column name="ROLLBACK_COUNT" type="BIGINT"/>
+            <column name="EXIT_CODE" type="VARCHAR(2500)"/>
+            <column name="EXIT_MESSAGE" type="VARCHAR(2500)"/>
+            <column name="LAST_UPDATED" type="TIMESTAMP"/>
+            <column name="CREATE_TIME" type="TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <createTable tableName="BATCH_STEP_EXECUTION_CONTEXT">
+            <column name="STEP_EXECUTION_ID" type="BIGINT">
+                <constraints primaryKey="true" nullable="false" foreignKeyName="STEP_EXEC_CTX_FK" references="BATCH_STEP_EXECUTION(STEP_EXECUTION_ID)"/>
+            </column>
+            <column name="SHORT_CONTEXT" type="VARCHAR(2500)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="SERIALIZED_CONTEXT" type="TEXT"/>
+        </createTable>
+
+        <createTable tableName="BATCH_JOB_EXECUTION_CONTEXT">
+            <column name="JOB_EXECUTION_ID" type="BIGINT">
+                <constraints primaryKey="true" nullable="false" foreignKeyName="JOB_EXEC_CTX_FK" references="BATCH_JOB_EXECUTION(JOB_EXECUTION_ID)"/>
+            </column>
+            <column name="SHORT_CONTEXT" type="VARCHAR(2500)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="SERIALIZED_CONTEXT" type="TEXT"/>
+        </createTable>
+    </changeSet>
+
+    <!-- PART B: App Tables -->
+    <changeSet id="101-ls_payment_log" author="ledgersync">
+        <createTable tableName="ls_payment_log">
+            <column name="internal_id" type="UUID">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="gateway_reference" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="amount" type="DECIMAL(19,4)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="currency" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="transaction_date" type="TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="gateway_provider" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <createIndex tableName="ls_payment_log" indexName="idx_payment_gateway_ref">
+            <column name="gateway_reference"/>
+        </createIndex>
+    </changeSet>
+
+    <changeSet id="102-ls_settlement_entry" author="ledgersync">
+        <createTable tableName="ls_settlement_entry">
+            <column name="id" type="UUID">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="source_provider" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="rrn" type="VARCHAR(255)"/>
+            <column name="auth_code" type="VARCHAR(255)"/>
+            <column name="request_id" type="VARCHAR(255)"/>
+            <column name="gross_amount" type="DECIMAL(19,4)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="net_amount" type="DECIMAL(19,4)"/>
+            <column name="fee_amount" type="DECIMAL(19,4)"/>
+            <column name="recon_status" type="VARCHAR(255)"/>
+            <column name="file_name" type="VARCHAR(255)"/>
+            <column name="row_number" type="INT"/>
+        </createTable>
+        <createIndex tableName="ls_settlement_entry" indexName="idx_settlement_rrn">
+            <column name="rrn"/>
+        </createIndex>
+        <createIndex tableName="ls_settlement_entry" indexName="idx_settlement_request_id">
+            <column name="request_id"/>
+        </createIndex>
+    </changeSet>
+
+    <changeSet id="103-ls_job_execution_log" author="ledgersync">
+        <createTable tableName="ls_job_execution_log">
+            <column name="id" type="UUID">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="batch_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="file_name" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="source_provider" type="VARCHAR(255)"/>
+            <column name="start_time" type="TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="end_time" type="TIMESTAMP"/>
+            <column name="status" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="total_rows_found" type="INT"/>
+            <column name="rows_processed" type="INT"/>
+            <column name="total_net_amount_sum" type="DECIMAL(19,4)"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="104-ls_recon_result" author="ledgersync">
+        <createTable tableName="ls_recon_result">
+            <column name="id" type="UUID">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="settlement_entry_id" type="UUID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="payment_log_id" type="UUID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="match_status" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="variance_amount" type="DECIMAL(19,4)"/>
+        </createTable>
+    </changeSet>
+
+    <!-- PART C: New Table -->
+    <changeSet id="105-ls_raw_ingestion" author="ledgersync">
+        <createTable tableName="ls_raw_ingestion">
+            <column name="id" type="UUID">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="payload" type="JSONB">
+                <!-- Fallback to CLOB for non-Postgres if needed, relying on Liquibase handling -->
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_at" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP"/>
+        </createTable>
+    </changeSet>
+
+</databaseChangeLog>

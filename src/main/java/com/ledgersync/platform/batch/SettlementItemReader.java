@@ -9,7 +9,6 @@ import org.springframework.batch.item.NonTransientResourceException;
 import org.springframework.batch.item.ParseException;
 import org.springframework.batch.item.UnexpectedInputException;
 import org.springframework.core.io.Resource;
-import org.springframework.core.io.Resource;
 
 public class SettlementItemReader implements ItemReader<SettlementEntryDto> {
 

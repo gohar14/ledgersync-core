@@ -28,4 +28,12 @@ public class PaymentSpecifications {
             return cb.like(cb.lower(root.get("gatewayReference")), "%" + gatewayReference.toLowerCase() + "%");
         };
     }
+
+    public static Specification<PaymentLog> hasMinAmount(java.math.BigDecimal minAmount) {
+        return (root, query, cb) -> {
+            if (minAmount == null)
+                return cb.conjunction();
+            return cb.greaterThanOrEqualTo(root.get("amount"), minAmount);
+        };
+    }
 }

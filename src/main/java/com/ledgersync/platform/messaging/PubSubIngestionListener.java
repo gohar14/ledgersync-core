@@ -14,9 +14,11 @@ import org.springframework.batch.core.launch.JobLauncher;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
 @Component
+@ConditionalOnProperty(name = "spring.cloud.gcp.pubsub.enabled", matchIfMissing = true)
 public class PubSubIngestionListener {
 
     private static final Logger log = LoggerFactory.getLogger(PubSubIngestionListener.class);

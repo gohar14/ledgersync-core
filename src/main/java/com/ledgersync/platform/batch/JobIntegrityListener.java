@@ -5,8 +5,7 @@ import com.ledgersync.platform.model.SettlementEntry;
 import com.ledgersync.platform.repository.JobExecutionLogRepository;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.List;
-import org.springframework.batch.core.ChunkListener;
+
 import org.springframework.batch.core.ItemWriteListener;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobExecutionListener;

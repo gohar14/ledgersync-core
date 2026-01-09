@@ -28,7 +28,8 @@ public class AnalyticsController {
             @RequestParam(required = false) String gatewayReference,
             @RequestParam(required = false) String status,
             Pageable pageable) {
-        PaymentSearchRequest request = new PaymentSearchRequest(startDate, endDate, gatewayReference, status);
+        PaymentSearchRequest request = new PaymentSearchRequest(
+                startDate, endDate, gatewayReference, status, null);
         return searchService.searchPayments(request, pageable);
     }
 

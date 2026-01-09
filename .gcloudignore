@@ -1,0 +1,9 @@
+.gcloudignore
+.git
+.gitignore
+.idea
+.vscode
+# target/
+# !target/*.jar
+node_modules/
+frontend/node_modules/

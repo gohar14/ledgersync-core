@@ -1,7 +1,7 @@
 package com.ledgersync.platform.service.impl;
 
 import com.ledgersync.platform.model.PaymentLog;
-import com.ledgersync.platform.model.SettlementEntry;
+
 import com.ledgersync.platform.model.dto.DashboardStatsDto;
 import com.ledgersync.platform.model.dto.PaymentSearchRequest;
 import com.ledgersync.platform.repository.PaymentLogRepository;
@@ -10,7 +10,6 @@ import com.ledgersync.platform.service.SearchService;
 import com.ledgersync.platform.specification.PaymentSpecifications;
 import java.math.BigDecimal;
 import java.text.NumberFormat;
-import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -32,7 +31,7 @@ public class SearchServiceImpl implements SearchService {
     @Override
     @Transactional(readOnly = true)
     public Page<PaymentLog> searchPayments(PaymentSearchRequest request, Pageable pageable) {
-        Specification<PaymentLog> spec = Specification.where(null);
+        Specification<PaymentLog> spec = Specification.where((Specification<PaymentLog>) null);
 
         if (request.startDate() != null || request.endDate() != null) {
             spec = spec.and(PaymentSpecifications.withDateRange(request.startDate(), request.endDate()));
@@ -40,6 +39,10 @@ public class SearchServiceImpl implements SearchService {
 
         if (request.gatewayReference() != null) {
             spec = spec.and(PaymentSpecifications.withGatewayReference(request.gatewayReference()));
+        }
+
+        if (request.minAmount() != null) {
+            spec = spec.and(PaymentSpecifications.hasMinAmount(request.minAmount()));
         }
 
         return paymentLogRepository.findAll(spec, pageable);
